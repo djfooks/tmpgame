@@ -185,13 +185,28 @@ function onTouch(e)
     bullets.push(new Bullet(player.pos, mousePos));
 }
 
-c.addEventListener("touchstart", onTouch, false);
-c.addEventListener("mousedown", onTouch, false);
-
-function getTouchPos(canvasDom, touchEvent) {
-  var rect = canvasDom.getBoundingClientRect();
-  return [
-    touchEvent.touches[0].clientX - rect.left,
-    touchEvent.touches[0].clientY - rect.top
-  ];
+function onMouse(e)
+{
+    e.preventDefault();
+    var mousePos = getMousePos(c, e);
+    bullets.push(new Bullet(player.pos, mousePos));
 }
+
+c.addEventListener("touchstart", onTouch, false);
+c.addEventListener("mousedown", onMouse, false);
+
+function getTouchPos(canvasDom, touchEvent)
+{
+    var rect = canvasDom.getBoundingClientRect();
+    return [
+        touchEvent.touches[0].clientX - rect.left,
+        touchEvent.touches[0].clientY - rect.top];
+}
+
+function getMousePos(canvas, event)
+{
+    var rect = canvas.getBoundingClientRect();
+    return [event.clientX - rect.left,
+            event.clientY - rect.top];
+}
+
