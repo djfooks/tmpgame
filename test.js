@@ -41,7 +41,7 @@ var loop = function ()
     ctx.arc(player.pos[0], player.pos[1], 5, 0, 2 * Math.PI);
     ctx.stroke();
     
-    if (targets.length === 0 && gameTime > lastTargetSpawn + Target.newTargetPeriod)
+    if (/*targets.length === 0 && */gameTime > lastTargetSpawn + Target.newTargetPeriod)
     {
         targets.push(new Target());
         lastTargetSpawn = gameTime;
@@ -107,7 +107,7 @@ Target.states = {
 };
 Target.speed = 10;
 Target.radius = 10;
-Target.newTargetPeriod = 5;
+Target.newTargetPeriod = 8;
 Target.health = 10;
 Target.waitTime = 2;
 Target.dodgeTime = 0.5;
@@ -178,13 +178,15 @@ Bullet.prototype.update = function(gameTime)
                 this.start[1] + this.dir[1] * delta * Bullet.speed];
 };
 
-
-c.addEventListener("touchstart", function (e)
+function onTouch(e)
 {
     e.preventDefault();
     var mousePos = getTouchPos(c, e);
     bullets.push(new Bullet(player.pos, mousePos));
-}, false);
+}
+
+c.addEventListener("touchstart", onTouch, false);
+c.addEventListener("mousedown", onTouch, false);
 
 function getTouchPos(canvasDom, touchEvent) {
   var rect = canvasDom.getBoundingClientRect();
