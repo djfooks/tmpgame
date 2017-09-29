@@ -55,8 +55,11 @@ var loop = function ()
         bullet = bullets[i];
         bullet.update(gameTime);
         pos = bullet.pos;
+        var dir = bullet.dir;
         ctx.beginPath();
-        ctx.arc(pos[0], pos[1], Bullet.radius, 0, 2 * Math.PI);
+        ctx.moveTo(pos[0], pos[1]);
+        ctx.lineTo(pos[0] - dir[0] * Bullet.radius,
+                   pos[1] - dir[1] * Bullet.radius);
         ctx.stroke();
     }
     
@@ -169,7 +172,7 @@ function Bullet(start, target)
     this.startTime = gameTime;
 }
 
-Bullet.radius = 3;
+Bullet.radius = 10;
 Bullet.speed = 200;
 Bullet.prototype.update = function(gameTime)
 {
