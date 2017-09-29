@@ -13,10 +13,11 @@ function debugInfo(str)
 }
 
 var c = document.getElementById("myCanvas");
-c.width = window.innerWidth - 15;
-c.height = window.innerHeight + 30;
+c.width = window.screen.availWidth - 15;//600;//window.innerWidth - 15;
+c.height = window.screen.availHeight - 15;//300;//window.innerHeight + 30;
 c.style.width = c.width + "px";
 c.style.height = c.height + "px";
+
 var ctx = c.getContext("2d");
 var startTime = Date.now() * 0.001;
 var lastTargetSpawn = 0;
@@ -39,6 +40,14 @@ var loop = function ()
     ctx.beginPath();
     player.pos[1] = 120 + Math.sin(gameTime * player.angleSpeed) * 100;
     ctx.arc(player.pos[0], player.pos[1], 5, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(5, 5);
+    ctx.lineTo(c.width - 5, 5);
+    ctx.lineTo(c.width - 5, c.height - 5);
+    ctx.lineTo(5, c.height - 5);
+    ctx.lineTo(5, 5);
     ctx.stroke();
     
     if (/*targets.length === 0 && */gameTime > lastTargetSpawn + Target.newTargetPeriod)
@@ -181,30 +190,20 @@ Bullet.prototype.update = function(gameTime)
                 this.start[1] + this.dir[1] * delta * Bullet.speed];
 };
 
-function onTouch(e)
+function enableFullscreen()
 {
-    e.preventDefault();
-    var mousePos = getTouchPos(c, e);
-    bullets.push(new Bullet(player.pos, mousePos));
+    c.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
 }
 
 function onMouse(e)
 {
+    enableFullscreen();
     e.preventDefault();
     var mousePos = getMousePos(c, e);
     bullets.push(new Bullet(player.pos, mousePos));
 }
 
-c.addEventListener("touchstart", onTouch, false);
 c.addEventListener("mousedown", onMouse, false);
-
-function getTouchPos(canvasDom, touchEvent)
-{
-    var rect = canvasDom.getBoundingClientRect();
-    return [
-        touchEvent.touches[0].clientX - rect.left,
-        touchEvent.touches[0].clientY - rect.top];
-}
 
 function getMousePos(canvas, event)
 {
@@ -212,4 +211,7 @@ function getMousePos(canvas, event)
     return [event.clientX - rect.left,
             event.clientY - rect.top];
 }
+
+
+
 
