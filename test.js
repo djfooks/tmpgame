@@ -18,6 +18,8 @@ c.height = window.screen.availHeight - 15;//300;//window.innerHeight + 30;
 c.style.width = c.width + "px";
 c.style.height = c.height + "px";
 
+var gameSpace = [c.width, c.height];
+
 var ctx = c.getContext("2d");
 var startTime = Date.now() * 0.001;
 var lastTargetSpawn = 0;
@@ -26,28 +28,85 @@ var gameTime = 0;
 var lastGameTime = 0;
 var bullets = [];
 var targets = [];
-var player = {
-    pos: [75, 0],
-    angleSpeed: 1
+var gameDebug = "";
+
+var FireState = {
+    READY: 1,
+    CHAMBERING: 2,
 };
+
+function Player()
+{
+    this.pos = [75, Math.floor(gameSpace[1] * 0.5)];
+    this.fireState = FireState.READY;
+    this.stateStart = gameTime;
+}
+Player.chamberingPeriod = 1;
+
+Player.prototype.fire = function (gameTime)
+{
+    if (this.fireState === FireState.READY)
+    {
+        this.fireState = FireState.CHAMBERING;
+        this.stateStart = gameTime;
+        return true;
+    }
+    return false;
+};
+
+Player.prototype.getColor = function ()
+{
+    if (this.fireState === FireState.READY)
+    {
+        return "white";
+    }
+    return "red";
+};
+
+Player.prototype.update = function (gameTime)
+{
+    var stateTime = gameTime - this.stateStart;
+    if (this.fireState === FireState.READY)
+    {
+        return;
+    }
+
+    if (stateTime > Player.chamberingPeriod)
+    {
+        this.fireState = FireState.READY;
+    }
+};
+
+var player = new Player();
+
 var loop = function ()
 {
     gameTime = Date.now() * 0.001 - startTime;
     deltaTime = gameTime - lastGameTime;
     lastGameTime = gameTime;
     requestAnimationFrame(loop);
+    
+    player.update(gameTime);
+    
     ctx.clearRect(0, 0, c.width, c.height);
+    
+    if (gameDebug.length > 0)
+    {
+        ctx.fillText(gameDebug, 10, 50);
+    }
+    
     ctx.beginPath();
-    player.pos[1] = 120 + Math.sin(gameTime * player.angleSpeed) * 100;
     ctx.arc(player.pos[0], player.pos[1], 5, 0, 2 * Math.PI);
+    ctx.fillStyle = player.getColor();
     ctx.stroke();
+    ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(5, 5);
-    ctx.lineTo(c.width - 5, 5);
-    ctx.lineTo(c.width - 5, c.height - 5);
-    ctx.lineTo(5, c.height - 5);
-    ctx.lineTo(5, 5);
+    ctx.moveTo(1, 1);
+    ctx.lineTo(c.width - 1, 1);
+    ctx.lineTo(c.width - 1, c.height - 1);
+    ctx.lineTo(1, c.height - 1);
+    ctx.lineTo(1, 1);
     ctx.stroke();
     
     if (/*targets.length === 0 && */gameTime > lastTargetSpawn + Target.newTargetPeriod)
@@ -119,9 +178,9 @@ Target.states = {
 };
 Target.speed = 10;
 Target.radius = 10;
-Target.newTargetPeriod = 8;
+Target.newTargetPeriod = 5;
 Target.health = 10;
-Target.waitTime = 2;
+Target.waitTime = 2.5;
 Target.dodgeTime = 0.5;
 Target.dodgeSpeed = 100;
 Target.dodgeLerp = 0.9;
@@ -200,7 +259,10 @@ function onMouse(e)
     enableFullscreen();
     e.preventDefault();
     var mousePos = getMousePos(c, e);
-    bullets.push(new Bullet(player.pos, mousePos));
+    if (player.fire(gameTime))
+    {
+        bullets.push(new Bullet(player.pos, mousePos));
+    }
 }
 
 c.addEventListener("mousedown", onMouse, false);
