@@ -30,6 +30,7 @@ var gameTime = 0;
 var lastGameTime = 0;
 var bullets = [];
 var targets = [];
+var stars = [];
 var gameDebug = "";
 
 var FireState = {
@@ -81,6 +82,43 @@ Player.prototype.update = function (gameTime)
 
 var player = new Player();
 
+function Star()
+{
+    this.pos = [Math.random() * gameSpace[0],
+                Math.random() * gameSpace[1]];
+    var dir = [Math.random(), Math.random()];
+    var length = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1]);
+    this.dir = [1, 0];
+    if (length > 0.01)
+    {
+        this.dir = [dir[0] / length, dir[1] / length];
+    }
+}
+
+Star.speed = 30;
+Star.size = 2;
+Star.numStars = 30;
+
+Star.prototype.update = function(gameTime, deltaTime)
+{
+    this.pos[0] -= deltaTime * Star.speed;
+    if (this.pos[0] < -10)
+    {
+        this.pos = [gameSpace[0] + Math.random() * 30,
+                    Math.random() * gameSpace[1]];
+    }
+};
+
+function addStars()
+{
+    var i;
+    for (i = 0; i < Star.numStars; i += 1)
+    {
+        stars.push(new Star());
+    }
+}
+addStars();
+
 var loop = function ()
 {
     gameTime = Date.now() * 0.001 - startTime;
@@ -90,7 +128,44 @@ var loop = function ()
     
     player.update(gameTime);
     
-    ctx.clearRect(0, 0, c.width, c.height);
+    //ctx.clearRect(0, 0, c.width, c.height);
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = "white";
+    
+    var i;
+    var pos;
+    var p0;
+    var p1;
+    var p2;
+    var p3;
+    var dir;
+    var bullet;
+    for (i = 0; i < stars.length; i += 1)
+    {    
+        stars[i].update(gameTime, deltaTime);
+        pos = stars[i].pos;
+        dir = stars[i].dir;        
+        
+        p0 = [pos[0] - dir[0] * Star.size,
+              pos[1] - dir[1] * Star.size];
+        p1 = [pos[0] + dir[0] * Star.size,
+              pos[1] + dir[1] * Star.size];
+              
+        dir = [dir[1], -dir[0]];
+        p2 = [pos[0] - dir[0] * Star.size,
+              pos[1] - dir[1] * Star.size];
+        p3 = [pos[0] + dir[0] * Star.size,
+              pos[1] + dir[1] * Star.size];
+
+        ctx.beginPath();
+        ctx.moveTo(p0[0], p0[1]);
+        ctx.lineTo(p1[0], p1[1]);
+        ctx.moveTo(p2[0], p2[1]);
+        ctx.lineTo(p3[0], p3[1]);
+        ctx.stroke();        
+    }
+    
     
     if (gameDebug.length > 0)
     {
@@ -117,15 +192,12 @@ var loop = function ()
         lastTargetSpawn = gameTime;
     }
     
-    var i;
-    var pos;
-    var bullet;
     for (i = 0; i < bullets.length; i += 1)
     {
         bullet = bullets[i];
         bullet.update(gameTime);
-        var p0 = bullet.p0;
-        var p1 = bullet.p1;
+        p0 = bullet.p0;
+        p1 = bullet.p1;
         ctx.beginPath();
         ctx.moveTo(p0[0], p0[1]);
         ctx.lineTo(p1[0], p1[1]);
