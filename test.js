@@ -170,9 +170,9 @@ var loop = function ()
         ctx.stroke();        
     }
     
-    
     if (gameDebug.length > 0)
     {
+        ctx.fillStyle = "white";
         ctx.fillText(gameDebug, 10, 50);
     }
     
@@ -206,6 +206,16 @@ var loop = function ()
         ctx.moveTo(p0[0], p0[1]);
         ctx.lineTo(p1[0], p1[1]);
         ctx.stroke();
+        
+        if (bullet.complete)
+        {
+            if (bullets.length > 0)
+            {
+                bullets[i] = bullets[bullets.length - 1];
+                i -= 1;
+            }
+            bullets.pop();
+        }
     }
     
     var j;
@@ -325,6 +335,7 @@ function Bullet(start, target)
     this.dir = dir;
     this.p1 = [start[0] - dir[0] * Bullet.size,
                start[1] - dir[1] * Bullet.size];
+    this.complete = false;
 }
 
 Bullet.size = 20;
@@ -338,6 +349,14 @@ Bullet.prototype.update = function(gameTime)
     var dir = this.dir;     
     this.p1 = [p0[0] - dir[0] * Bullet.size,
                p0[1] - dir[1] * Bullet.size];
+
+    if (p0[0] - Bullet.size < 0 ||
+        p0[0] + Bullet.size > gameSpace[0] ||
+        p0[1] - Bullet.size < 0 ||
+        p0[1] + Bullet.size > gameSpace[1])
+    {
+        this.complete = true;
+    }
 };
 
 function enableFullscreen()
