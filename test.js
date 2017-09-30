@@ -123,6 +123,10 @@ var loop = function ()
 {
     gameTime = Date.now() * 0.001 - startTime;
     deltaTime = gameTime - lastGameTime;
+    if (deltaTime > 0.4)
+    {
+        deltaTime = 0.4;
+    }
     lastGameTime = gameTime;
     requestAnimationFrame(loop);
     
@@ -213,6 +217,10 @@ var loop = function ()
         ctx.beginPath();
         ctx.arc(pos[0], pos[1], Target.radius, 0, 2 * Math.PI);
         ctx.stroke();
+        ctx.fillStyle = "grey";
+        ctx.beginPath();
+        ctx.arc(pos[0], pos[1], Target.radius - 2, 0, 2 * Math.PI);
+        ctx.fill();
         
         for (j = 0; j < bullets.length; j += 1)
         {
