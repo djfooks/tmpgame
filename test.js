@@ -166,7 +166,7 @@ function Target()
 {
     var y = Math.random() * (c.height - 20) + 10;
     this.state = Target.states.WAIT; 
-    this.stateStart = gameTime;
+    this.stateStart = 0;
     this.pos = [c.width + Target.radius, y];
     this.velocity = [0, 0];
     this.dodgeDirection = 0;
@@ -178,7 +178,7 @@ Target.states = {
 };
 Target.speed = 10;
 Target.radius = 10;
-Target.newTargetPeriod = 5;
+Target.newTargetPeriod = 8;
 Target.health = 10;
 Target.waitTime = 2.5;
 Target.dodgeTime = 0.5;
@@ -219,6 +219,15 @@ Target.prototype.update = function (gameTime, deltaTime)
     var pos = this.pos;
     this.pos = [pos[0] + velocity[0] * deltaTime,
                 pos[1] + velocity[1] * deltaTime];
+                
+    if (this.pos[1] < Target.radius)
+    {
+        this.pos[1] = Target.radius;
+    }
+    else if (this.pos[1] > gameSpace[1] - Target.radius)
+    {
+        this.pos[1] = gameSpace[1] - Target.radius;
+    }
 };
 
 function Bullet(start, target)
