@@ -1,3 +1,5 @@
+/* globals Helpers */
+
 var debugMsg = "";
 
 function onError(message, source, lineno/*, colno, error*/)
@@ -122,12 +124,11 @@ var loop = function ()
     {
         bullet = bullets[i];
         bullet.update(gameTime);
-        pos = bullet.pos;
-        var dir = bullet.dir;
+        var p0 = bullet.p0;
+        var p1 = bullet.p1;
         ctx.beginPath();
-        ctx.moveTo(pos[0], pos[1]);
-        ctx.lineTo(pos[0] - dir[0] * Bullet.radius,
-                   pos[1] - dir[1] * Bullet.radius);
+        ctx.moveTo(p0[0], p0[1]);
+        ctx.lineTo(p1[0], p1[1]);
         ctx.stroke();
     }
     
@@ -144,10 +145,7 @@ var loop = function ()
         for (j = 0; j < bullets.length; j += 1)
         {
             bullet = bullets[j];
-            var dx = bullet.pos[0] - pos[0];
-            var dy = bullet.pos[1] - pos[1];
-            var length = Math.sqrt(dx * dx + dy * dy);
-            if (length < Target.radius + Bullet.radius)
+            if (Helpers.inteceptCircleLineSeg(pos, Target.radius, bullet.p0, bullet.p1))
             {
                 if (targets.length > 0)
                 {
@@ -178,7 +176,7 @@ Target.states = {
 };
 Target.speed = 10;
 Target.radius = 10;
-Target.newTargetPeriod = 8;
+Target.newTargetPeriod = 3.2;
 Target.health = 10;
 Target.waitTime = 2.5;
 Target.dodgeTime = 0.5;
@@ -232,30 +230,34 @@ Target.prototype.update = function (gameTime, deltaTime)
 
 function Bullet(start, target)
 {
+    this.startTime = gameTime;
     this.start = [start[0], start[1]];
     this.target = target;
-    this.pos = [start[0], start[1]];
+    this.p0 = [start[0], start[1]];
     var dx = target[0] - start[0];
     var dy = target[1] - start[1];
     var length = Math.sqrt(dx * dx + dy * dy);
-    if (length < 0.1)
+    var dir = [1, 0];
+    if (length > 0.1)
     {
-        this.dir = [0, 0];
+        dir = [dx / length, dy / length];
     }
-    else
-    {
-        this.dir = [dx / length, dy / length];
-    }
-    this.startTime = gameTime;
+    this.dir = dir;
+    this.p1 = [start[0] - dir[0] * Bullet.size,
+               start[1] - dir[1] * Bullet.size];
 }
 
-Bullet.radius = 10;
+Bullet.size = 20;
 Bullet.speed = 200;
 Bullet.prototype.update = function(gameTime)
 {
     var delta = gameTime - this.startTime;
-    this.pos = [this.start[0] + this.dir[0] * delta * Bullet.speed,
-                this.start[1] + this.dir[1] * delta * Bullet.speed];
+    this.p0 = [this.start[0] + this.dir[0] * delta * Bullet.speed,
+               this.start[1] + this.dir[1] * delta * Bullet.speed];
+    var p0 = this.p0;
+    var dir = this.dir;     
+    this.p1 = [p0[0] - dir[0] * Bullet.size,
+               p0[1] - dir[1] * Bullet.size];
 };
 
 function enableFullscreen()
