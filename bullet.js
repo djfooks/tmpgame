@@ -31,10 +31,10 @@ Bullet.prototype.update = function(gameSpace, gameTime)
     this.p1 = [p0[0] - dir[0] * Bullet.size,
                p0[1] - dir[1] * Bullet.size];
 
-    if (p0[0] - Bullet.size < 0 ||
-        p0[0] + Bullet.size > gameSpace[0] ||
-        p0[1] - Bullet.size < 0 ||
-        p0[1] + Bullet.size > gameSpace[1])
+    if (p0[0] + Bullet.size < 0 ||
+        p0[0] - Bullet.size > gameSpace[0] ||
+        p0[1] + Bullet.size < 0 ||
+        p0[1] - Bullet.size > gameSpace[1])
     {
         this.complete = true;
     }
