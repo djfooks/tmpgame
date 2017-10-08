@@ -4,8 +4,8 @@
 function App()
 {
     var canvas = this.canvas = document.getElementById("myCanvas");
-    canvas.width = 1200;//window.screen.availWidth - 15;//600;//window.innerWidth - 15;
-    canvas.height = 700;//window.screen.availHeight - 15;//300;//window.innerHeight + 30;
+    canvas.width = Math.min(1200, window.screen.availWidth - 15);
+    canvas.height = Math.min(700, window.screen.availHeight - 15);
     canvas.style.width = canvas.width + "px";
     canvas.style.height = canvas.height + "px";
 
@@ -13,6 +13,7 @@ function App()
 
     var gameSpace = this.gameSpace = [canvas.width, canvas.height];
 
+    //canvas.globalCompositeOperation = "lighter";
     var ctx = this.ctx = canvas.getContext("2d");
     this.startTime = Date.now() * 0.001;
     this.lastTargetSpawn = 0.0;
@@ -57,6 +58,7 @@ App.prototype.loop = function ()
     ctx.strokeStyle = "white";
 
     var i;
+    var j;
     var pos;
     var p0;
     var p1;
@@ -123,12 +125,52 @@ App.prototype.loop = function ()
     for (i = 0; i < bullets.length; i += 1)
     {
         bullet = bullets[i];
-        bullet.update(gameSpace, gameTime);
+        bullet.update(gameSpace, gameTime, deltaTime);
+
+        var particles = bullet.particles;
+        for (j = 0; j < particles.length; j += 1)
+        {
+            p0 = particles[j].p0;
+            p1 = particles[j].p1;
+            ctx.beginPath();
+            ctx.moveTo(p0[0], p0[1]);
+            ctx.lineTo(p1[0], p1[1]);
+            ctx.strokeStyle = "rgba(255, 255, 255, " + particles[j].alpha + ")";
+            ctx.lineWidth = 2;
+            ctx.lineCap = "round";
+            ctx.stroke();
+        }
+
         p0 = bullet.p0;
         p1 = bullet.p1;
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.arc(p0[0], p0[1], 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#000000";
+        ctx.beginPath();
+        ctx.arc(p0[0], p0[1], 1, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.arc(p1[0], p1[1], 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#000000";
+        ctx.beginPath();
+        ctx.arc(p1[0], p1[1], 1, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.beginPath();
         ctx.moveTo(p0[0], p0[1]);
         ctx.lineTo(p1[0], p1[1]);
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         if (bullet.complete)
@@ -142,7 +184,7 @@ App.prototype.loop = function ()
         }
     }
 
-    var j;
+    ctx.strokeStyle = "#FFFFFF";
     for (i = 0; i < targets.length; i += 1)
     {
         var target = targets[i];
